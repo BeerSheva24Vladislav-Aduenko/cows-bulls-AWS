@@ -35,4 +35,7 @@ public class Game {
         this.dateTime = dateTime;
     }
 
+    public boolean isFinished() {
+        return isFinished;
+    }
 }

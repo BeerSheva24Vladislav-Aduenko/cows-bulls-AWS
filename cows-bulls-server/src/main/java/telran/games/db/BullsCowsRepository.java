@@ -19,11 +19,13 @@ public interface BullsCowsRepository {
 
     public void startGame(String username, long gameId);
 
+    public List<Long> findPlaybleGames(String username);
+
     public void makeMove(String username, long gameId, String sequence, int bulls, int cows);
 
     public String findWinnerGame(long gameId);
 
-    public void setWinnerAndFinishGame(String username, long gameId);
+    public void setWinnerAndFinishGame(String username, long gameId, String sequence, int bulls, int cows);
 
     public List<MoveResult> findAllMovesGameGamer(String username, long gameId);
 }

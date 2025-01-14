@@ -1,16 +1,30 @@
 package telran.games.db;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
+import java.time.*;
+import java.util.*;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import jakarta.persistence.*;
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import telran.games.MoveResult;
-import telran.games.entities.*;
+
+import telran.games.db.config.BullsCowsPersistenceUnitInfo;
+import telran.games.entities.Game;
+import telran.games.entities.GameGamer;
+import telran.games.entities.Gamer;
+import telran.games.entities.Move;
 import telran.games.exceptions.*;
 
-public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
+public class BullsCowsRepositoryImpl implements BullsCowsRepository {
     EntityManager em;
+
+    public BullsCowsRepositoryImpl() {
+        PersistenceUnitInfo persistenceUnitInfo = new BullsCowsPersistenceUnitInfo();
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("hibernate.hbm2ddl.auto", "update");
+        HibernatePersistenceProvider provider = new HibernatePersistenceProvider();
+        EntityManagerFactory emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, properties);
+        em = emf.createEntityManager();
+    }
 
     @Override
     public void createGamer(String username, LocalDate birthdate) {
@@ -142,22 +156,26 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
     }
 
     @Override
-    public void setWinnerAndFinishGame(String username, long gameId) {
-        Game game = getGame(gameId);
-        GameGamer gameGamer = getGameGamer(username, gameId);
+    public void setWinnerAndFinishGame(String username, long gameId, String sequence, int bulls, int cows) {
         var transaction = em.getTransaction();
         transaction.begin();
         try {
-            gameGamer.setWinner(true);
-            em.persist(gameGamer);
+            Game game = checkGameFinished(gameId);
+            GameGamer gameGamer = getGameGamer(username, gameId);
+            Move move = new Move(gameGamer, bulls, cows, sequence);
+            em.persist(move);
             game.setGameIsFinished(true);
             em.persist(game);
+            gameGamer.setWinner(true);
+            em.persist(gameGamer);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
             throw e;
         }
     }
+  
+
 
     private GameGamer getGameGamer(String username, long gameId) {
         // TODO Auto-generated method stub
@@ -170,4 +188,18 @@ public class BullsCowsRepositoryJpaImp implements BullsCowsRepository {
         throw new UnsupportedOperationException("Unimplemented method 'findAllMovesGameGamer'");
     }
 
+    @Override
+    public List<Long> findPlaybleGames(String username) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'findPlaybleGames'");
+    }
+
+
+    private Game checkGameFinished(long gameId) {
+        Game game = getGame(gameId);
+        if (game.isFinished()) {
+            throw new GameAlreadyFinishedException(gameId, findWinnerGame(gameId));
+        }
+        return game;
+    }
 }

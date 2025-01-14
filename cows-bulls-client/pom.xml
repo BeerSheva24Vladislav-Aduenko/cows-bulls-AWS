@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>telran.games</groupId>
@@ -13,7 +13,24 @@
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
- <dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>telran.net</groupId>
+            <artifactId>tcp-net</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
+
+        <dependency>
+            <groupId>telran.view</groupId>
+            <artifactId>cli-view</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
@@ -37,9 +54,10 @@
             <artifactId>HikariCP</artifactId>
             <version>5.1.0</version>
         </dependency>
+
         <dependency>
-            <groupId>telran.view</groupId>
-            <artifactId>cli-view</artifactId>
+            <groupId>telran.games</groupId>
+            <artifactId>bulls-cows-app</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

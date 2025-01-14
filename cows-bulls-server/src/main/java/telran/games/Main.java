@@ -1,48 +1,29 @@
 package telran.games;
 
-import telran.games.db.config.BullsCowsPersistenceUnitInfo;
-import telran.net.TcpServer;
-import telran.view.*;
+import telran.games.services.BullsCowsServiceImpl;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import telran.net.*;
 
-import org.hibernate.jpa.HibernatePersistenceProvider;
-
-import jakarta.persistence.*;
-import jakarta.persistence.spi.PersistenceUnitInfo;
+import java.util.Scanner;;
 
 public class Main {
-    static InputOutput io = new StandardInputOutput();
-    static EntityManager em;
-    
+    private static final int PORT = 5000;
 
     public static void main(String[] args) {
-        createEntityManager();
-    }
-
-    private static void createEntityManager() {
-        HashMap<String, Object> hibernateProperties = new HashMap<>();
-        hibernateProperties.put("hibernate.hbm2ddl.auto", "update");
-        PersistenceUnitInfo persistenceUnit = new BullsCowsPersistenceUnitInfo();
-        HibernatePersistenceProvider hibernatePersistenceProvider = new HibernatePersistenceProvider();
-        EntityManagerFactory emf = hibernatePersistenceProvider.createContainerEntityManagerFactory(persistenceUnit,
-                hibernateProperties);
-        em = emf.createEntityManager();
-    }
-
-    TcpServer tcpServer = new TcpServer(new CompanyProtocol(company), PORT);
-    new Thread(tcpServer).start();
-    Scanner scanner = new Scanner(System.in);
-    while (true) {
-        System.out.println("enter shutdown for stopping server");
-        String line = scanner.nextLine();
-        if (line.equals(
-                "shutdown")) {
-            tcpServer.shutdown();
-            break;
+        BullsCowsServiceImpl service = new BullsCowsServiceImpl();
+        Protocol protocol = new BullsCowsProtocol(service);
+        TcpServer server = new TcpServer(protocol, PORT);
+        Thread threadTcpServer = new Thread(server);
+        threadTcpServer.start();
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.print("To shutdown server input \"shutdown\":");
+            String command = scanner.nextLine();
+            if (command.equals("shutdown")) {
+                server.shutdown();
+                break;
+            }
         }
+        scanner.close();
     }
 }
