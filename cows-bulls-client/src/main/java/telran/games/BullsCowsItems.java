@@ -52,7 +52,7 @@ public class BullsCowsItems {
             io.writeString("Games you can join: %s".formatted(games.toString()));
             long gameId = Long.parseLong(io.readStringOptions("Enter game id:", "Wrong game id", longListToOptions(games)));
             service.joinToGame(currentGamer, gameId);
-            io.writeLine("Gamer %s joined to game %d. HAVE FUN!".formatted(currentGamer, gameId));
+            io.writeLine("Gamer %s joined to game %d. You need start the game!".formatted(currentGamer, gameId));
         }
     }
 
@@ -64,7 +64,7 @@ public class BullsCowsItems {
             io.writeString("Games you can start: %s".formatted(games.toString()));
             long gameId = Long.parseLong(io.readStringOptions("Enter game id:", "Wrong game id", longListToOptions(games)));
             service.startGame(currentGamer, gameId);
-            io.writeLine("Game %d is started.".formatted(gameId));
+            io.writeLine("Game %d is started. Select `Play game` to start.".formatted(gameId));
         }
     }
 
@@ -76,7 +76,7 @@ public class BullsCowsItems {
             io.writeString("Games you can play: %s".formatted(games.toString()));
             long gameId = Long.parseLong(io.readStringOptions("Enter game id:", "Wrong game id", longListToOptions(games)));
             currentGame = gameId;
-            Menu menu = new Menu("Playing game", getPlayGameItems());
+            Menu menu = new Menu("Playing game. HAVE FUN!", getPlayGameItems());
             menu.perform(io);
         }
     }
@@ -100,7 +100,7 @@ public class BullsCowsItems {
         resList.stream().forEach(r -> {
             io.writeString("%8s %4d  %4d".formatted(r.sequence(), r.bulls(), r.cows()));
             if (r.bulls() == 4) {
-                io.writeString("You are winner. Congratulations");
+                io.writeString("Winner Winner Winner. Congratulations!");
             }
         });
     }

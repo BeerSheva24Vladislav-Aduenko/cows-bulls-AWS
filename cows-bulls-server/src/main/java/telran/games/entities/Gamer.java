@@ -17,10 +17,6 @@ public class Gamer {
         this.username = username;
     }
 
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthdate = birthdate;
-    }
-
     public Gamer (String username, LocalDate birthdate) {
         this.username = username;
         this.birthdate = birthdate;

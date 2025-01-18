@@ -82,7 +82,7 @@ public class BullsCowsServiceImpl implements BullsCowsService {
     public MoveResult calculateMove(String sequence, String gameSequence) {
         int bulls = 0;
         int cows = 0;
-        System.out.println(gameSequence + "gameSequence");
+        System.out.println(gameSequence + " gameSequence");
         System.out.println(sequence);
         for (int i = 0; i < N_DIGITS; i++) {
             if (gameSequence.charAt(i) == sequence.charAt(i)) {
