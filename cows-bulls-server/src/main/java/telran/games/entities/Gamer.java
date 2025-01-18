@@ -13,10 +13,20 @@ public class Gamer {
         return "Gamer [username=" + username + ", birthdate=" + birthdate + "]";
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthdate = birthdate;
+    }
+
     public Gamer (String username, LocalDate birthdate) {
         this.username = username;
         this.birthdate = birthdate;
     }
-
  
+    public Gamer() {
+        
+    }
 }

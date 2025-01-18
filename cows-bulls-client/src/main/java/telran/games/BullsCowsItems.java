@@ -9,7 +9,7 @@ import telran.view.*;
 
 public class BullsCowsItems {
     static BullsCowsService service;
-    static String currentGamer = "anonimus";
+    static String currentGamer = "NoName";
     static long currentGame = -1;
 
     public static Item[] getItems(BullsCowsService service) {
@@ -41,7 +41,7 @@ public class BullsCowsItems {
 
     static void createGame(InputOutput io) {
         long gameId = service.createGame();
-        io.writeLine("Game %d is created.".formatted(gameId));
+        io.writeLine("Game %d is created. You can join it.".formatted(gameId));
     }
 
     static void joinGame(InputOutput io) {
@@ -52,7 +52,7 @@ public class BullsCowsItems {
             io.writeString("Games you can join: %s".formatted(games.toString()));
             long gameId = Long.parseLong(io.readStringOptions("Enter game id:", "Wrong game id", longListToOptions(games)));
             service.joinToGame(currentGamer, gameId);
-            io.writeLine("Gamer %s joined to game %d.".formatted(currentGamer, gameId));
+            io.writeLine("Gamer %s joined to game %d. HAVE FUN!".formatted(currentGamer, gameId));
         }
     }
 
@@ -74,7 +74,6 @@ public class BullsCowsItems {
             io.writeLine("There are no games to play.");
         } else {
             io.writeString("Games you can play: %s".formatted(games.toString()));
-            //long gameId = io.readLong("Enter game id:", "Wrong game id");
             long gameId = Long.parseLong(io.readStringOptions("Enter game id:", "Wrong game id", longListToOptions(games)));
             currentGame = gameId;
             Menu menu = new Menu("Playing game", getPlayGameItems());
@@ -96,7 +95,6 @@ public class BullsCowsItems {
 
     static void makeMove(InputOutput io) {
         String sequence = io.readString("Enter sequence:");
-        //checkSequence
         List<MoveResult> resList = service.makeMove(currentGamer, currentGame, sequence);
         io.writeString("Sequence Bulls Cows");
         resList.stream().forEach(r -> {

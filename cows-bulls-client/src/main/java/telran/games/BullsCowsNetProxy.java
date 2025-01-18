@@ -16,6 +16,10 @@ public class BullsCowsNetProxy implements BullsCowsService {
     }
 
     @Override
+    public void login(String username) {
+        client.sendAndReceive("login", username);
+    }
+    @Override
     public long createGame() {
         return Long.parseLong(client.sendAndReceive("createGame", ""));
     }
@@ -42,10 +46,6 @@ public class BullsCowsNetProxy implements BullsCowsService {
         client.sendAndReceive("joinToGame", jsonObject.toString());
     }
 
-    @Override
-    public void login(String username) {
-        client.sendAndReceive("login", username);
-    }
 
     @Override
     public List<MoveResult> makeMove(String username, long gameId, String sequence) {

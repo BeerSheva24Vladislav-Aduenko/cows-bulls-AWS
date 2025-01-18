@@ -28,4 +28,6 @@ public interface BullsCowsRepository {
     public void setWinnerAndFinishGame(String username, long gameId, String sequence, int bulls, int cows);
 
     public List<MoveResult> findAllMovesGameGamer(String username, long gameId);
+
+    public String findSequence(long gameId);
 }

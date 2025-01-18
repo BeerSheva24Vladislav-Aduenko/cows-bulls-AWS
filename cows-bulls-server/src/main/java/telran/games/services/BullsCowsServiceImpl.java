@@ -69,7 +69,7 @@ public class BullsCowsServiceImpl implements BullsCowsService {
     @Override
     public List<MoveResult> makeMove(String username, long gameId, String sequence) {
         checkLogin(username);
-        String gameSequence = repo.findWinnerGame(gameId);
+        String gameSequence = repo.findSequence(gameId);
         MoveResult res = calculateMove(sequence, gameSequence);
         if (res.bulls() == 4) {
             repo.setWinnerAndFinishGame(username, gameId, sequence, res.bulls(), res.cows());
@@ -82,6 +82,8 @@ public class BullsCowsServiceImpl implements BullsCowsService {
     public MoveResult calculateMove(String sequence, String gameSequence) {
         int bulls = 0;
         int cows = 0;
+        System.out.println(gameSequence + "gameSequence");
+        System.out.println(sequence);
         for (int i = 0; i < N_DIGITS; i++) {
             if (gameSequence.charAt(i) == sequence.charAt(i)) {
                 bulls++;
@@ -94,8 +96,8 @@ public class BullsCowsServiceImpl implements BullsCowsService {
         return new MoveResult(sequence, bulls, cows);
     }
 
-    private void checkLogin(String username) {
-        if (username.equals("anonimus")) {
+    private void checkLogin(String username) { 
+        if (username.equals("NoName")) {
             throw new GamerIsNotLoginException();
         }
     }

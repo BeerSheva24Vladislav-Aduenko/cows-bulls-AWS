@@ -75,7 +75,7 @@ public class BullsCowsRepositoryImpl implements BullsCowsRepository {
     @Override
     public List<Long> findJoinebleGames(String username) {
         TypedQuery<Long> query = em.createQuery(
-                "select game.id from GameGamer where gamer.username != ?1 and game.dateTime is null",
+                "select id from Game where dateTime is null except select game.id from GameGamer where gamer.username = ?1",
                 Long.class);
         query.setParameter(1, username);
         return query.getResultList();
@@ -88,6 +88,7 @@ public class BullsCowsRepositoryImpl implements BullsCowsRepository {
         try {
             Game game = getGame(gameId);
             Gamer gamer = getGamer(username);
+            checkJoinebleGame(username, gameId);
             GameGamer gameGamer = new GameGamer(game, gamer);
             em.persist(gameGamer);
             transaction.commit();
@@ -109,7 +110,7 @@ public class BullsCowsRepositoryImpl implements BullsCowsRepository {
     @Override
     public List<Long> findStartebleGames(String username) {
         TypedQuery<Long> query = em.createQuery(
-                "select game.id from GameGamer where gamer.username != ?1 and game.dateTime is null",
+                "select game.id from GameGamer where gamer.username = ?1 and game.dateTime is null",
                 Long.class);
         query.setParameter(1, username);
         return query.getResultList();
@@ -117,13 +118,14 @@ public class BullsCowsRepositoryImpl implements BullsCowsRepository {
 
     @Override
     public void startGame(String username, long gameId) {
-        Game game = getGame(gameId);
         var transaction = em.getTransaction();
         transaction.begin();
         try {
+            Game game = getGame(gameId);
             LocalDateTime dateTime = LocalDateTime.now();
+            checkStartebleGame(username, gameId);
             game.setStartGame(dateTime);
-            em.persist(dateTime);
+            em.persist(game);
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
@@ -133,10 +135,11 @@ public class BullsCowsRepositoryImpl implements BullsCowsRepository {
 
     @Override
     public void makeMove(String username, long gameId, String sequence, int bulls, int cows) {
-        GameGamer gameGamer = getGameGamer(username, gameId);
         var transaction = em.getTransaction();
         transaction.begin();
         try {
+            checkGameFinished(gameId);
+            GameGamer gameGamer = getGameGamer(username, gameId);
             Move move = new Move(gameGamer, bulls, cows, sequence);
             em.persist(move);
             transaction.commit();
@@ -149,7 +152,7 @@ public class BullsCowsRepositoryImpl implements BullsCowsRepository {
     @Override
     public String findWinnerGame(long gameId) {
         TypedQuery<String> query = em.createQuery(
-                "SELECT gamer.username FROM GameGamer where game.id = ?1 and is_winner = true", String.class);
+                "SELECT gamer.username FROM GameGamer where game.id = ?1 and isWinner", String.class);
         query.setParameter(1, gameId);
         List<String> list = query.getResultList();
         return list.isEmpty() ? "" : list.get(0);
@@ -174,26 +177,39 @@ public class BullsCowsRepositoryImpl implements BullsCowsRepository {
             throw e;
         }
     }
-  
-
 
     private GameGamer getGameGamer(String username, long gameId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getGameGamer'");
+        TypedQuery<GameGamer> query = em.createQuery(
+                "select gameGamer from GameGamer gameGamer where game.id = ?1 and gamer.username = ?2",
+                GameGamer.class);
+        query.setParameter(1, gameId);
+        query.setParameter(2, username);
+        List<GameGamer> res = query.getResultList();
+        if (res.isEmpty()) {
+            throw new GamerNotInGameException(username, gameId);
+        }
+        return res.get(0);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<MoveResult> findAllMovesGameGamer(String username, long gameId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findAllMovesGameGamer'");
+        Query query = em.createQuery(
+                "select sequence, bulls, cows from Move where gameGamer.game.id = ?1 and gameGamer.gamer.username = ?2");
+        query.setParameter(1, gameId);
+        query.setParameter(2, username);
+        List<Object[]> res = query.getResultList();
+        return res.stream().map(arr -> new MoveResult((String) arr[0], (int) arr[1], (int) arr[2])).toList();
     }
 
     @Override
     public List<Long> findPlaybleGames(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findPlaybleGames'");
+        TypedQuery<Long> query = em.createQuery(
+                "select game.id from GameGamer where gamer.username = ?1 and game.dateTime is not null and not game.isFinished",
+                Long.class);
+        query.setParameter(1, username);
+        return query.getResultList();
     }
-
 
     private Game checkGameFinished(long gameId) {
         Game game = getGame(gameId);
@@ -201,5 +217,23 @@ public class BullsCowsRepositoryImpl implements BullsCowsRepository {
             throw new GameAlreadyFinishedException(gameId, findWinnerGame(gameId));
         }
         return game;
+    }
+
+    @Override
+    public String findSequence(long gameId) {
+        Game game = getGame(gameId);
+        return game.getSequence();
+    }
+
+    private void checkJoinebleGame(String username, long gameId) {
+        if (!findJoinebleGames(username).contains(gameId)) {
+            throw new GamerCannotJoinToGameException(username, gameId);
+        }
+    }
+
+    private void checkStartebleGame(String username, long gameId) { 
+        if (!findStartebleGames(username).contains(gameId)) {
+            throw new GamerCannotStartGameException(username, gameId);
+        }  
     }
 }
